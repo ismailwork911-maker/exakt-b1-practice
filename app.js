@@ -1,0 +1,532 @@
+const STORAGE_KEY = 'exakt-b1-progress-v1';
+
+const testThemes = [
+  { id: 'test-1', title: 'Test 1', subtitle: 'Alltag und Beruf', theme: 'Beruf' },
+  { id: 'test-2', title: 'Test 2', subtitle: 'Reisen und Freizeit', theme: 'Reisen' },
+  { id: 'test-3', title: 'Test 3', subtitle: 'Familie und Beziehungen', theme: 'Familie' },
+  { id: 'test-4', title: 'Test 4', subtitle: 'Gesundheit und Wohlbefinden', theme: 'Gesundheit' },
+  { id: 'test-5', title: 'Test 5', subtitle: 'Stadtleben und Mobilität', theme: 'Stadt' },
+  { id: 'test-6', title: 'Test 6', subtitle: 'Kultur und Medien', theme: 'Kultur' },
+  { id: 'test-7', title: 'Test 7', subtitle: 'Essen und Einkaufen', theme: 'Essen' },
+  { id: 'test-8', title: 'Test 8', subtitle: 'Sprachen und Lernen', theme: 'Lernen' },
+  { id: 'test-9', title: 'Test 9', subtitle: 'Umwelt und Nachhaltigkeit', theme: 'Umwelt' },
+  { id: 'test-10', title: 'Test 10', subtitle: 'Zukunft und Pläne', theme: 'Zukunft' }
+];
+
+function createTest({ id, title, subtitle, theme }) {
+  const createPartQuestions = (prefix, count, options, correctOptions, type, promptBase) =>
+    Array.from({ length: count }, (_, index) => {
+      const correct = correctOptions[index % correctOptions.length];
+      return createQuestion(
+        `${id}-${prefix}-${index + 1}`,
+        `${promptBase} ${index + 1} zu ${theme}.`,
+        options,
+        correct,
+        type
+      );
+    });
+
+  const part1 = {
+    title: 'Teil 1 – Richtig oder Falsch',
+    questions: createPartQuestions('p1', 6, ['Richtig', 'Falsch'], ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Richtig', 'Falsch'], 'true-false', 'Ist die Aussage')
+  };
+
+  const part2 = {
+    title: 'Teil 2 – A, B oder C',
+    questions: createPartQuestions('p2', 6, ['A', 'B', 'C'], ['A', 'B', 'C', 'A', 'B', 'C'], 'abc', 'Welche Antwort passt')
+  };
+
+  const part3 = {
+    title: 'Teil 3 – Buchstaben zuordnen',
+    questions: createPartQuestions('p3', 6, ['A', 'B', 'C'], ['A', 'B', 'C', 'A', 'B', 'C'], 'match', 'Welcher Buchstabe passt')
+  };
+
+  const part4 = {
+    title: 'Teil 4 – Ja oder Nein',
+    questions: createPartQuestions('p4', 6, ['Ja', 'Nein'], ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein'], 'yes-no', 'Ist die Aussage')
+  };
+
+  const part5 = {
+    title: 'Teil 5 – A, B oder C',
+    questions: createPartQuestions('p5', 6, ['A', 'B', 'C'], ['B', 'C', 'A', 'B', 'C', 'A'], 'abc', 'Welche Lösung ist')
+  };
+
+  return { id, title, subtitle, theme, parts: [part1, part2, part3, part4, part5] };
+}
+
+function createQuestion(id, prompt, options, correct, type) {
+  return { id, prompt, options, correct, type };
+}
+
+const tests = testThemes.map(createTest);
+
+const state = {
+  view: 'home',
+  currentTestId: null,
+  currentQuestionIndex: 0,
+  answers: {},
+  results: null,
+  reviewQuestions: [],
+  progress: {}
+};
+
+function init() {
+  loadProgress();
+  bindEvents();
+  render();
+}
+
+function bindEvents() {
+  document.addEventListener('click', (event) => {
+    const actionEl = event.target.closest('[data-action]');
+    if (!actionEl) return;
+
+    const { action } = actionEl.dataset;
+
+    switch (action) {
+      case 'open-test':
+        startTest(actionEl.dataset.testId);
+        break;
+      case 'show-home':
+        state.view = 'home';
+        render();
+        break;
+      case 'show-preparation':
+        state.view = 'preparation';
+        render();
+        break;
+      case 'show-statistics':
+        state.view = 'statistics';
+        render();
+        break;
+      case 'start-quiz':
+        if (state.currentTestId) {
+          state.view = 'quiz';
+          state.currentQuestionIndex = 0;
+          render();
+        }
+        break;
+      case 'submit-quiz':
+        submitQuiz();
+        break;
+      case 'review-results':
+        state.view = 'review';
+        state.reviewQuestions = state.results ? state.results.reviewQuestions : [];
+        render();
+        break;
+      case 'choose-another-test':
+        state.view = 'home';
+        render();
+        break;
+      default:
+        break;
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    const optionEl = event.target.closest('[data-option]');
+    if (!optionEl) return;
+
+    const { option, questionId } = optionEl.dataset;
+    state.answers[questionId] = option;
+    saveProgress();
+    render();
+  });
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state.progress = parsed;
+      state.answers = {};
+      if (state.currentTestId) {
+        state.answers = state.progress[state.currentTestId]?.answers || {};
+      }
+    }
+  } catch (error) {
+    console.warn('Konnte Fortschritt nicht laden.', error);
+  }
+}
+
+function saveProgress() {
+  const currentTest = getCurrentTest();
+  if (!currentTest) return;
+
+  const existing = state.progress[currentTest.id] || { history: [], answers: {} };
+  existing.answers = { ...existing.answers, ...state.answers };
+  existing.lastUpdated = new Date().toISOString();
+  existing.lastQuestionIndex = state.currentQuestionIndex;
+  state.progress[currentTest.id] = existing;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.progress));
+}
+
+function getCurrentTest() {
+  return tests.find((test) => test.id === state.currentTestId) || null;
+}
+
+function getAllQuestions() {
+  const currentTest = getCurrentTest();
+  if (!currentTest) return [];
+  return currentTest.parts.flatMap((part) => part.questions.map((q, index) => ({ ...q, partTitle: part.title, partIndex: currentTest.parts.indexOf(part), questionIndex: index })));
+}
+
+function getCurrentQuestion() {
+  const questions = getAllQuestions();
+  return questions[state.currentQuestionIndex] || null;
+}
+
+function startTest(testId) {
+  state.currentTestId = testId;
+  state.currentQuestionIndex = 0;
+  state.answers = state.progress[testId]?.answers || {};
+  state.view = 'quiz';
+  render();
+}
+
+function submitQuiz() {
+  const currentTest = getCurrentTest();
+  if (!currentTest) return;
+
+  const questions = getAllQuestions();
+  let correctCount = 0;
+
+  const partResults = currentTest.parts.map((part) => {
+    const partQuestions = part.questions;
+    let partCorrect = 0;
+    partQuestions.forEach((question) => {
+      const selected = state.answers[question.id];
+      const isCorrect = selected === question.correct;
+      if (isCorrect) partCorrect += 1;
+    });
+    return { title: part.title, total: partQuestions.length, correct: partCorrect };
+  });
+
+  questions.forEach((question) => {
+    const selected = state.answers[question.id];
+    if (selected === question.correct) correctCount += 1;
+  });
+
+  const total = questions.length;
+  const score = Math.round((correctCount / total) * 100);
+  const reviewQuestions = questions.map((question) => ({
+    ...question,
+    selected: state.answers[question.id] || '—',
+    correct: question.correct,
+    isCorrect: state.answers[question.id] === question.correct
+  }));
+
+  const existing = state.progress[currentTest.id] || { history: [], answers: {} };
+  existing.answers = { ...existing.answers, ...state.answers };
+  existing.completed = true;
+  existing.lastScore = score;
+  existing.lastCompletedAt = new Date().toISOString();
+  existing.history = existing.history || [];
+  existing.history.unshift({
+    date: new Date().toLocaleString('de-DE'),
+    score,
+    correct: correctCount,
+    total,
+    passed: score >= 60
+  });
+  state.progress[currentTest.id] = existing;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.progress));
+
+  state.results = {
+    test: currentTest,
+    score,
+    correctCount,
+    wrongCount: total - correctCount,
+    total,
+    reviewQuestions,
+    partResults
+  };
+  state.reviewQuestions = reviewQuestions;
+  state.view = 'results';
+  render();
+}
+
+function render() {
+  renderHome();
+  renderQuiz();
+  renderResults();
+  renderReview();
+  renderPreparation();
+  renderStatistics();
+
+  document.querySelectorAll('.view').forEach((view) => view.classList.remove('active'));
+  const activeView = document.getElementById(`${state.view}-view`);
+  if (activeView) {
+    activeView.classList.add('active');
+  }
+}
+
+function renderHome() {
+  const homeEl = document.getElementById('home-view');
+  const completedTests = Object.values(state.progress).filter((entry) => entry.completed).length;
+  const averageScore = computeAverageScore();
+
+  homeEl.innerHTML = `
+    <div class="card hero-card">
+      <div class="hero-badge">Exakt B1 · Vorbereitung</div>
+      <h2>Übe gezielt mit 10 professionell aufgebauten Tests</h2>
+      <p>Jeder Test enthält 5 Teile, klare Aufgaben, sofortige Lösungen und einen Verlauf für deine Fortschritte.</p>
+      <div class="result-grid">
+        <div class="metric-card">
+          <span>Abgeschlossene Tests</span>
+          <strong>${completedTests}</strong>
+        </div>
+        <div class="metric-card">
+          <span>Durchschnitt</span>
+          <strong>${averageScore}%</strong>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="primary-btn" data-action="show-statistics">Statistiken ansehen</button>
+        <button class="secondary-btn" data-action="show-preparation">Lösungen & Vorbereitung</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      ${tests.map((test) => {
+        const progressEntry = state.progress[test.id];
+        const percent = progressEntry?.lastScore || 0;
+        return `
+          <button class="test-card" data-action="open-test" data-test-id="${test.id}">
+            <h3>${test.title}</h3>
+            <p>${test.subtitle}</p>
+            <div class="test-meta">
+              <span>${test.theme}</span>
+              <span>${progressEntry?.completed ? 'Abgeschlossen' : 'Starten'}</span>
+            </div>
+            <div class="progress-line" style="margin-top: 10px;">
+              <span style="width: ${percent}%;"></span>
+            </div>
+          </button>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderQuiz() {
+  const quizEl = document.getElementById('quiz-view');
+  const currentTest = getCurrentTest();
+  if (!currentTest) {
+    quizEl.innerHTML = '<div class="card"><p class="empty-state">Bitte wähle zuerst einen Test aus.</p></div>';
+    return;
+  }
+
+  const questions = getAllQuestions();
+  const answeredCount = questions.filter((question) => Boolean(state.answers[question.id])).length;
+  const progressPercent = Math.round((answeredCount / questions.length) * 100);
+
+  quizEl.innerHTML = `
+    <div class="card">
+      <div class="quiz-topbar">
+        <div>
+          <h2>${currentTest.title}</h2>
+          <div class="quiz-meta">${currentTest.subtitle}</div>
+        </div>
+        <div class="quiz-meta">${answeredCount}/${questions.length} beantwortet</div>
+      </div>
+
+      <div class="progress-line" style="margin: 8px 0 16px;">
+        <span style="width: ${progressPercent}%;"></span>
+      </div>
+      <p class="helper-text">Wähle für jede Frage die Antwort aus und klicke unten auf „Ergebnis prüfen“.</p>
+
+      <div class="quiz-list">
+        ${currentTest.parts.map((part) => `
+          <div class="part-block">
+            <h3>${part.title}</h3>
+            ${part.questions.map((question, questionIndex) => {
+              const fullQuestion = questions.find((item) => item.id === question.id);
+              return `
+                <div class="question-card">
+                  <p class="question-title">${questionIndex + 1}. ${fullQuestion?.prompt || question.prompt}</p>
+                  <div class="option-stack">
+                    ${(fullQuestion?.options || question.options).map((option) => `
+                      <button class="option-btn ${state.answers[fullQuestion?.id || question.id] === option ? 'active' : ''}" data-option="${option}" data-question-id="${fullQuestion?.id || question.id}">
+                        ${option}
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="nav-row" style="margin-top: 18px;">
+        <button class="secondary-btn" data-action="show-home">Zurück</button>
+        <button class="primary-btn" data-action="submit-quiz">Ergebnis prüfen</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderResults() {
+  const resultsEl = document.getElementById('results-view');
+  if (!state.results) {
+    resultsEl.innerHTML = '<div class="card"><p class="empty-state">Noch keine Ergebnisse verfügbar.</p></div>';
+    return;
+  }
+
+  const { test, score, correctCount, wrongCount, total, partResults } = state.results;
+
+  resultsEl.innerHTML = `
+    <div class="card">
+      <h2>Ergebnis für ${test.title}</h2>
+      <p class="quiz-meta">${test.subtitle}</p>
+      <div class="result-grid">
+        <div class="metric-card">
+          <span>Ergebnis</span>
+          <strong>${correctCount}/${total}</strong>
+          <div class="quiz-meta">${score}%</div>
+        </div>
+        <div class="metric-card">
+          <span>Richtig</span>
+          <strong>${correctCount}</strong>
+        </div>
+        <div class="metric-card">
+          <span>Falsch</span>
+          <strong>${wrongCount}</strong>
+        </div>
+        <div class="metric-card">
+          <span>Gesamt</span>
+          <strong>${total}</strong>
+        </div>
+      </div>
+
+      <div class="summary-card" style="padding: 18px; margin-top: 16px;">
+        <h3>Ergebnis nach Teilen</h3>
+        ${partResults.map((part) => `
+          <div class="part-result">
+            <strong>${part.title}</strong>
+            <div class="quiz-meta">${part.correct} von ${part.total} richtig</div>
+            <div class="progress-line" style="margin-top: 8px;"><span style="width: ${(part.correct / part.total) * 100}%;"></span></div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="nav-row" style="margin-top: 18px;">
+        <button class="primary-btn" data-action="review-results">Antworten prüfen</button>
+        <button class="secondary-btn" data-action="choose-another-test">Anderen Test wählen</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderReview() {
+  const reviewEl = document.getElementById('review-view');
+  if (!state.reviewQuestions.length) {
+    reviewEl.innerHTML = '<div class="card"><p class="empty-state">Noch keine Prüfungen zur Ansicht gespeichert.</p></div>';
+    return;
+  }
+
+  reviewEl.innerHTML = `
+    <div class="card">
+      <h2>Antwortenübersicht</h2>
+      <p class="quiz-meta">Prüfe jede Antwort mit der korrekten Lösung.</p>
+      <div class="list-stack">
+        ${state.reviewQuestions.map((question) => `
+          <div class="review-card">
+            <p><strong>${question.partTitle}</strong></p>
+            <p>${question.prompt}</p>
+            <p>Gewählt: <strong>${question.selected}</strong></p>
+            <p>Korrekt: <strong>${question.correct}</strong></p>
+          </div>
+        `).join('')}
+      </div>
+      <div class="nav-row" style="margin-top: 18px;">
+        <button class="secondary-btn" data-action="show-home">Zurück zum Start</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderPreparation() {
+  const prepEl = document.getElementById('preparation-view');
+  prepEl.innerHTML = `
+    <div class="card">
+      <h2>Vorbereitung und Lösungen</h2>
+      <p class="quiz-meta">Alle Tests mit den korrekten Lösungen für jeden Teil.</p>
+      <div class="list-stack">
+        ${tests.map((test) => `
+          <div class="review-card">
+            <h3>${test.title} · ${test.subtitle}</h3>
+            ${test.parts.map((part, index) => `
+              <div class="part-result">
+                <strong>${part.title}</strong>
+                <ul>
+                  ${part.questions.map((question) => `<li>${question.prompt} — <strong>${question.correct}</strong></li>`).join('')}
+                </ul>
+              </div>
+            `).join('')}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderStatistics() {
+  const statsEl = document.getElementById('statistics-view');
+  const completedEntries = Object.entries(state.progress).filter(([, entry]) => entry.completed);
+  const completedTests = completedEntries.length;
+  const averageScore = computeAverageScore();
+  const bestScore = completedEntries.reduce((best, [, entry]) => Math.max(best, entry.lastScore || 0), 0);
+  const passedCount = completedEntries.filter(([, entry]) => (entry.lastScore || 0) >= 60).length;
+  const progressAnalysis = tests.map((test) => {
+    const entry = state.progress[test.id];
+    const percent = entry?.lastScore || 0;
+    return `
+      <div class="part-result">
+        <strong>${test.title}</strong>
+        <div class="quiz-meta">${percent}%</div>
+        <div class="progress-line" style="margin-top: 8px;"><span style="width: ${percent}%;"></span></div>
+      </div>
+    `;
+  }).join('');
+
+  const historyList = completedEntries.flatMap(([, entry]) => (entry.history || []).map((item) => `
+    <div class="review-card">
+      <strong>${entry.title || 'Test'}</strong>
+      <p>${item.date} · ${item.score}%</p>
+    </div>
+  `));
+
+  statsEl.innerHTML = `
+    <div class="card">
+      <h2>Statistiken</h2>
+      <div class="stats-grid">
+        <div class="metric-card"><span>Abgeschlossene Tests</span><strong>${completedTests}</strong></div>
+        <div class="metric-card"><span>Durchschnitt</span><strong>${averageScore}%</strong></div>
+        <div class="metric-card"><span>Bestes Ergebnis</span><strong>${bestScore}%</strong></div>
+        <div class="metric-card"><span>Bestanden</span><strong>${passedCount}</strong></div>
+      </div>
+
+      <div class="summary-card" style="padding: 18px; margin-top: 16px;">
+        <h3>Fortschrittsanalyse</h3>
+        ${progressAnalysis}
+      </div>
+
+      <div class="summary-card" style="padding: 18px; margin-top: 16px;">
+        <h3>Verlauf</h3>
+        ${historyList.length ? historyList.join('') : '<p class="empty-state">Noch kein Verlauf vorhanden.</p>'}
+      </div>
+    </div>
+  `;
+}
+
+function computeAverageScore() {
+  const completedEntries = Object.values(state.progress).filter((entry) => entry.completed);
+  if (!completedEntries.length) return 0;
+  const total = completedEntries.reduce((sum, entry) => sum + (entry.lastScore || 0), 0);
+  return Math.round(total / completedEntries.length);
+}
+
+init();

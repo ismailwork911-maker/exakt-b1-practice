@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exakt B1 – Übungstests</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="header-content">
+          <div>
+            <p class="eyebrow">Exakt B1</p>
+            <h1>Prüfungstraining mit Lösungen</h1>
+            <p class="subtitle">Modernes Üben, klare Fortschritte und sofortiges Feedback.</p>
+          </div>
+          <div class="header-actions">
+            <button class="ghost-btn" data-action="show-home">Startseite</button>
+            <button class="ghost-btn" data-action="show-preparation">Lösungen</button>
+            <button class="ghost-btn" data-action="show-statistics">Statistiken</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <section id="home-view" class="view active"></section>
+        <section id="quiz-view" class="view"></section>
+        <section id="results-view" class="view"></section>
+        <section id="review-view" class="view"></section>
+        <section id="preparation-view" class="view"></section>
+        <section id="statistics-view" class="view"></section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
