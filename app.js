@@ -14,41 +14,70 @@ const testThemes = [
 ];
 
 function createTest({ id, title, subtitle, theme }) {
-  const createPartQuestions = (prefix, count, options, correctOptions, type, promptBase) =>
-    Array.from({ length: count }, (_, index) => {
-      const correct = correctOptions[index % correctOptions.length];
-      return createQuestion(
-        `${id}-${prefix}-${index + 1}`,
-        `${promptBase} ${index + 1} zu ${theme}.`,
-        options,
-        correct,
-        type
-      );
+  const createPartQuestions = (prefix, count, questionsData) =>
+    questionsData.map((item, index) => {
+      const questionId = `${id}-${prefix}-${index + 1}`;
+      return createQuestion(questionId, item.prompt, item.options, item.correct, item.type);
     });
 
   const part1 = {
     title: 'Teil 1 – Richtig oder Falsch',
-    questions: createPartQuestions('p1', 6, ['Richtig', 'Falsch'], ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Richtig', 'Falsch'], 'true-false', 'Ist die Aussage')
+    questions: createPartQuestions('p1', 6, [
+      { prompt: `Stimmt die Aussage über ${theme} im Text?`, options: ['Richtig', 'Falsch'], correct: 'Richtig', type: 'true-false' },
+      { prompt: `Wird ${theme} im Text als wichtig dargestellt?`, options: ['Richtig', 'Falsch'], correct: 'Richtig', type: 'true-false' },
+      { prompt: `Ist die Lösung für ${theme} im Beispiel klar erkennbar?`, options: ['Richtig', 'Falsch'], correct: 'Falsch', type: 'true-false' },
+      { prompt: `Wird der Vorschlag zu ${theme} als sinnvoll bewertet?`, options: ['Richtig', 'Falsch'], correct: 'Richtig', type: 'true-false' },
+      { prompt: `Ist die Information über ${theme} im Text nicht vollständig?`, options: ['Richtig', 'Falsch'], correct: 'Falsch', type: 'true-false' },
+      { prompt: `Klingt der Hinweis zu ${theme} passend?`, options: ['Richtig', 'Falsch'], correct: 'Richtig', type: 'true-false' }
+    ])
   };
 
   const part2 = {
     title: 'Teil 2 – A, B oder C',
-    questions: createPartQuestions('p2', 6, ['A', 'B', 'C'], ['A', 'B', 'C', 'A', 'B', 'C'], 'abc', 'Welche Antwort passt')
+    questions: createPartQuestions('p2', 6, [
+      { prompt: `Welche Antwort passt am besten zu ${theme}?`, options: ['A', 'B', 'C'], correct: 'A', type: 'abc' },
+      { prompt: `Welche Lösung ist für ${theme} am passendsten?`, options: ['A', 'B', 'C'], correct: 'B', type: 'abc' },
+      { prompt: `Welche Variante beschreibt ${theme} am treffendsten?`, options: ['A', 'B', 'C'], correct: 'C', type: 'abc' },
+      { prompt: `Welche Option passt zur Situation rund um ${theme}?`, options: ['A', 'B', 'C'], correct: 'A', type: 'abc' },
+      { prompt: `Welche Antwort ist bei ${theme} die beste Wahl?`, options: ['A', 'B', 'C'], correct: 'B', type: 'abc' },
+      { prompt: `Welche Lösung würde man bei ${theme} zuerst wählen?`, options: ['A', 'B', 'C'], correct: 'C', type: 'abc' }
+    ])
   };
 
   const part3 = {
-    title: 'Teil 3 – Buchstaben zuordnen',
-    questions: createPartQuestions('p3', 6, ['A', 'B', 'C'], ['A', 'B', 'C', 'A', 'B', 'C'], 'match', 'Welcher Buchstabe passt')
+    title: 'Teil 3 – Zuordnen',
+    questions: createPartQuestions('p3', 6, [
+      { prompt: `Ordnen Sie die Aussage zu ${theme} dem passenden Buchstaben zu.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'J', type: 'match' },
+      { prompt: `Ordnen Sie die passende Ergänzung zu ${theme} korrekt zu.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'M', type: 'match' },
+      { prompt: `Welche Zuordnung passt zu ${theme}?`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'C', type: 'match' },
+      { prompt: `Ordnen Sie die Information zu ${theme} passend ein.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'O', type: 'match' },
+      { prompt: `Welcher Buchstabe passt zur Beschreibung von ${theme}?`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'F', type: 'match' },
+      { prompt: `Ordnen Sie den Hinweis zu ${theme} korrekt zu.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'K', type: 'match' }
+    ])
   };
 
   const part4 = {
     title: 'Teil 4 – Ja oder Nein',
-    questions: createPartQuestions('p4', 6, ['Ja', 'Nein'], ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein'], 'yes-no', 'Ist die Aussage')
+    questions: createPartQuestions('p4', 6, [
+      { prompt: `Ist die Lösung für ${theme} hilfreich?`, options: ['Ja', 'Nein'], correct: 'Ja', type: 'yes-no' },
+      { prompt: `Wird der Vorschlag zu ${theme} unterstützt?`, options: ['Ja', 'Nein'], correct: 'Nein', type: 'yes-no' },
+      { prompt: `Ist die Information über ${theme} klar?`, options: ['Ja', 'Nein'], correct: 'Ja', type: 'yes-no' },
+      { prompt: `Passt die Empfehlung zu ${theme}?`, options: ['Ja', 'Nein'], correct: 'Ja', type: 'yes-no' },
+      { prompt: `Wäre die Entscheidung bei ${theme} sinnvoll?`, options: ['Ja', 'Nein'], correct: 'Nein', type: 'yes-no' },
+      { prompt: `Ist der Hinweis zu ${theme} passend?`, options: ['Ja', 'Nein'], correct: 'Ja', type: 'yes-no' }
+    ])
   };
 
   const part5 = {
     title: 'Teil 5 – A, B oder C',
-    questions: createPartQuestions('p5', 6, ['A', 'B', 'C'], ['B', 'C', 'A', 'B', 'C', 'A'], 'abc', 'Welche Lösung ist')
+    questions: createPartQuestions('p5', 6, [
+      { prompt: `Welche Aussage passt am besten zu ${theme}?`, options: ['A', 'B', 'C'], correct: 'B', type: 'abc' },
+      { prompt: `Welche Lösung wäre bei ${theme} die beste Abschlussform?`, options: ['A', 'B', 'C'], correct: 'C', type: 'abc' },
+      { prompt: `Welche Variante passt am besten zur Situation bei ${theme}?`, options: ['A', 'B', 'C'], correct: 'A', type: 'abc' },
+      { prompt: `Welche Antwort wäre in ${theme} am sinnvollsten?`, options: ['A', 'B', 'C'], correct: 'B', type: 'abc' },
+      { prompt: `Welche Lösung ist bei ${theme} am treffendsten?`, options: ['A', 'B', 'C'], correct: 'C', type: 'abc' },
+      { prompt: `Welche Antwort passt zur letzten Aufgabe zu ${theme}?`, options: ['A', 'B', 'C'], correct: 'A', type: 'abc' }
+    ])
   };
 
   return { id, title, subtitle, theme, parts: [part1, part2, part3, part4, part5] };
@@ -335,17 +364,17 @@ function renderQuiz() {
       <div class="progress-line" style="margin: 8px 0 16px;">
         <span style="width: ${progressPercent}%;"></span>
       </div>
-      <p class="helper-text">Wähle für jede Frage die Antwort aus und klicke unten auf „Ergebnis prüfen“.</p>
+      <p class="helper-text">Wähle für jede Frage deine Antwort aus und klicke unten auf „Ergebnis prüfen“.</p>
 
       <div class="quiz-list">
-        ${currentTest.parts.map((part) => `
+        ${currentTest.parts.map((part, partIndex) => `
           <div class="part-block">
             <h3>${part.title}</h3>
             ${part.questions.map((question, questionIndex) => {
               const fullQuestion = questions.find((item) => item.id === question.id);
               return `
                 <div class="question-card">
-                  <p class="question-title">${questionIndex + 1}. ${fullQuestion?.prompt || question.prompt}</p>
+                  <p class="question-title"><strong>${partIndex + 1}.${questionIndex + 1}</strong> ${fullQuestion?.prompt || question.prompt}</p>
                   <div class="option-stack">
                     ${(fullQuestion?.options || question.options).map((option) => `
                       <button class="option-btn ${state.answers[fullQuestion?.id || question.id] === option ? 'active' : ''}" data-option="${option}" data-question-id="${fullQuestion?.id || question.id}">

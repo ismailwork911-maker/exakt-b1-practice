@@ -317,8 +317,34 @@ button {
 
 .option-stack {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
   gap: 12px;
   margin-bottom: 24px;
+}
+
+.quiz-list {
+  display: grid;
+  gap: 20px;
+}
+
+.part-block {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  background: var(--surface-soft);
+}
+
+.question-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 12px;
+  background: white;
+}
+
+.helper-text {
+  color: var(--muted);
+  margin: 0 0 14px;
 }
 
 .nav-row {
