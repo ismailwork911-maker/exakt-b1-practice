@@ -15,7 +15,7 @@ const testThemes = [
 
 function createTest({ id, title, subtitle, theme }) {
   const createPartQuestions = (prefix, count, questionsData) =>
-    questionsData.map((item, index) => {
+    questionsData.slice(0, count).map((item, index) => {
       const questionId = `${id}-${prefix}-${index + 1}`;
       return createQuestion(questionId, item.prompt, item.options, item.correct, item.type);
     });
@@ -46,13 +46,14 @@ function createTest({ id, title, subtitle, theme }) {
 
   const part3 = {
     title: 'Teil 3 – Zuordnen',
-    questions: createPartQuestions('p3', 6, [
+    questions: createPartQuestions('p3', 7, [
       { prompt: `Ordnen Sie die Aussage zu ${theme} dem passenden Buchstaben zu.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'J', type: 'match' },
       { prompt: `Ordnen Sie die passende Ergänzung zu ${theme} korrekt zu.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'M', type: 'match' },
       { prompt: `Welche Zuordnung passt zu ${theme}?`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'C', type: 'match' },
       { prompt: `Ordnen Sie die Information zu ${theme} passend ein.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'O', type: 'match' },
       { prompt: `Welcher Buchstabe passt zur Beschreibung von ${theme}?`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'F', type: 'match' },
-      { prompt: `Ordnen Sie den Hinweis zu ${theme} korrekt zu.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'K', type: 'match' }
+      { prompt: `Ordnen Sie den Hinweis zu ${theme} korrekt zu.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'K', type: 'match' },
+      { prompt: `Ordnen Sie den letzten Hinweis zu ${theme} passend zu.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'D', type: 'match' }
     ])
   };
 
@@ -70,13 +71,11 @@ function createTest({ id, title, subtitle, theme }) {
 
   const part5 = {
     title: 'Teil 5 – A, B oder C',
-    questions: createPartQuestions('p5', 6, [
+    questions: createPartQuestions('p5', 4, [
       { prompt: `Welche Aussage passt am besten zu ${theme}?`, options: ['A', 'B', 'C'], correct: 'B', type: 'abc' },
       { prompt: `Welche Lösung wäre bei ${theme} die beste Abschlussform?`, options: ['A', 'B', 'C'], correct: 'C', type: 'abc' },
       { prompt: `Welche Variante passt am besten zur Situation bei ${theme}?`, options: ['A', 'B', 'C'], correct: 'A', type: 'abc' },
-      { prompt: `Welche Antwort wäre in ${theme} am sinnvollsten?`, options: ['A', 'B', 'C'], correct: 'B', type: 'abc' },
-      { prompt: `Welche Lösung ist bei ${theme} am treffendsten?`, options: ['A', 'B', 'C'], correct: 'C', type: 'abc' },
-      { prompt: `Welche Antwort passt zur letzten Aufgabe zu ${theme}?`, options: ['A', 'B', 'C'], correct: 'A', type: 'abc' }
+      { prompt: `Welche Antwort wäre in ${theme} am sinnvollsten?`, options: ['A', 'B', 'C'], correct: 'B', type: 'abc' }
     ])
   };
 
