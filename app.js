@@ -147,6 +147,17 @@ function bindEvents() {
         state.view = 'home';
         render();
         break;
+      case 'retake-test':
+        if (state.currentTestId) {
+          startTest(state.currentTestId);
+        }
+        break;
+      case 'reset-current-test':
+        resetCurrentTest();
+        break;
+      case 'reset-all-tests':
+        resetAllTests();
+        break;
       default:
         break;
     }
@@ -207,10 +218,21 @@ function getCurrentQuestion() {
 }
 
 function startTest(testId) {
+  const existing = state.progress[testId] || { history: [], answers: {} };
+  existing.answers = {};
+  existing.completed = false;
+  existing.lastScore = 0;
+  existing.lastCompletedAt = null;
+  existing.lastUpdated = new Date().toISOString();
+  state.progress[testId] = existing;
+
   state.currentTestId = testId;
   state.currentQuestionIndex = 0;
-  state.answers = state.progress[testId]?.answers || {};
+  state.answers = {};
+  state.results = null;
+  state.reviewQuestions = [];
   state.view = 'quiz';
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.progress));
   render();
 }
 
@@ -314,6 +336,7 @@ function renderHome() {
       <div class="nav-row">
         <button class="primary-btn" data-action="show-statistics">Statistiken ansehen</button>
         <button class="secondary-btn" data-action="show-preparation">Lösungen & Vorbereitung</button>
+        <button class="secondary-btn" data-action="reset-all-tests">Alle Tests zurücksetzen</button>
       </div>
     </div>
 
@@ -391,6 +414,7 @@ function renderQuiz() {
 
       <div class="nav-row" style="margin-top: 18px;">
         <button class="secondary-btn" data-action="show-home">Zurück</button>
+        <button class="secondary-btn" data-action="reset-current-test">Test zurücksetzen</button>
         <button class="primary-btn" data-action="submit-quiz">Ergebnis prüfen</button>
       </div>
     </div>
@@ -443,7 +467,8 @@ function renderResults() {
 
       <div class="nav-row" style="margin-top: 18px;">
         <button class="primary-btn" data-action="review-results">Antworten prüfen</button>
-        <button class="secondary-btn" data-action="choose-another-test">Anderen Test wählen</button>
+        <button class="secondary-btn" data-action="retake-test">Test nochmal starten</button>
+        <button class="secondary-btn" data-action="reset-current-test">Zurücksetzen</button>
       </div>
     </div>
   `;
@@ -482,16 +507,35 @@ function renderPreparation() {
   prepEl.innerHTML = `
     <div class="card">
       <h2>Vorbereitung und Lösungen</h2>
-      <p class="quiz-meta">Alle Tests mit den korrekten Lösungen für jeden Teil.</p>
-      <div class="list-stack">
+      <p class="quiz-meta">Diese Seite ist deine Lernhilfe: prüfe jede Lösung direkt, lerne die Muster und starte einen Test danach erneut frisch.</p>
+      <div class="prep-grid">
+        <div class="prep-card">
+          <h3>So nutzt du die Seite</h3>
+          <ul class="tip-list">
+            <li>Beantworte zuerst einen Test ohne Hilfe.</li>
+            <li>Prüfe danach die Lösungen in jedem Teil.</li>
+            <li>Starte den Test danach erneut, um das Gelernte sofort zu testen.</li>
+          </ul>
+        </div>
+        <div class="prep-card">
+          <h3>PDF-Lösungsschlüssel</h3>
+          <p>Die Lösungsschlüssel aus dem Korrekturbogen sind hier als klare Lernhilfe aufgebaut, damit du dich gezielt auf Schwachstellen konzentrieren kannst.</p>
+          <a class="secondary-btn" href="ilide.info-losungsschlussel-exakt-1-pr_d2f4dd942c47bcf2a0c92ed80228b201.pdf" target="_blank" rel="noopener">PDF öffnen</a>
+        </div>
+      </div>
+      <div class="list-stack" style="margin-top: 16px;">
         ${tests.map((test) => `
           <div class="review-card">
-            <h3>${test.title} · ${test.subtitle}</h3>
-            ${test.parts.map((part, index) => `
+            <div class="quiz-topbar" style="margin-bottom: 8px;">
+              <h3>${test.title} · ${test.subtitle}</h3>
+              <span class="hero-badge">Teil 1-5</span>
+            </div>
+            ${test.parts.map((part) => `
               <div class="part-result">
                 <strong>${part.title}</strong>
+                <div class="quiz-meta">Lösungen: ${part.questions.map((question) => question.correct).join(' · ')}</div>
                 <ul>
-                  ${part.questions.map((question) => `<li>${question.prompt} — <strong>${question.correct}</strong></li>`).join('')}
+                  ${part.questions.map((question) => `<li><span class="quiz-meta">${question.prompt}</span><br /><strong>${question.correct}</strong></li>`).join('')}
                 </ul>
               </div>
             `).join('')}
