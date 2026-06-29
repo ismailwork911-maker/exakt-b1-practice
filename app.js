@@ -5,10 +5,10 @@ function normalizeAnswer(value) {
 }
 
 const testThemes = [
-  { id: 'unit-1', title: 'Einheit 1', subtitle: 'Leseverstehen', theme: 'Alltag', answers: { p1: ['Richtig', 'Falsch', 'Falsch', 'Falsch', 'Richtig', 'Richtig'], p2: ['A', 'C', 'C', 'A', 'C', 'A'], p3: ['B', 'D', 'A', 'B', 'O', 'F', 'E'], p4: ['Nein', 'Ja', 'Nein', 'Nein', 'Ja', 'Ja', 'Ja'], p5: ['A', 'C', 'B', 'A'] } },
+  { id: 'unit-1', title: 'Einheit 1', subtitle: 'Leseverstehen', theme: 'Alltag', answers: { p1: ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Richtig', 'Falsch'], p2: ['A', 'C', 'C', 'A', 'C', 'A'], p3: ['I', 'B', 'D', 'A', 'B', 'O', 'F'], p4: ['Nein', 'Ja', 'Nein', 'Nein', 'Ja', 'Ja', 'Ja'], p5: ['A', 'C', 'B', 'A'] } },
   { id: 'unit-2', title: 'Einheit 2', subtitle: 'Beruf und Alltag', theme: 'Beruf', answers: { p1: ['Falsch', 'Richtig', 'Richtig', 'Falsch', 'Richtig', 'Falsch'], p2: ['B', 'C', 'A', 'B', 'C', 'C'], p3: ['B', 'H', 'D', 'I', 'O', 'I', 'E'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['B', 'C', 'A', 'B'] } },
-  { id: 'unit-3', title: 'Einheit 3', subtitle: 'Freizeit und Reisen', theme: 'Reisen', answers: { p1: ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Falsch', 'Richtig'], p2: ['C', 'A', 'B', 'C', 'A', 'B'], p3: ['C', 'F', 'G', 'J', 'M', 'N', 'O'], p4: ['Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein'], p5: ['C', 'B', 'A', 'C'] } },
-  { id: 'unit-4', title: 'Einheit 4', subtitle: 'Familie und Beziehungen', theme: 'Familie', answers: { p1: ['Richtig', 'Richtig', 'Falsch', 'Richtig', 'Falsch', 'Richtig'], p2: ['A', 'B', 'C', 'A', 'B', 'C'], p3: ['D', 'E', 'F', 'G', 'H', 'I', 'J'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['A', 'B', 'C', 'A'] } },
+  { id: 'unit-3', title: 'Einheit 3', subtitle: 'Freizeit und Reisen', theme: 'Reisen', answers: { p1: ['Richtig', 'Falsch', 'Falsch', 'Falsch', 'Richtig', 'Richtig'], p2: ['A', 'C', 'C', 'A', 'C', 'A'], p3: ['I', 'B', 'D', 'A', 'B', 'O', 'F'], p4: ['Nein', 'Ja', 'Nein', 'Nein', 'Ja', 'Ja', 'Ja'], p5: ['A', 'C', 'B', 'A'] } },
+  { id: 'unit-4', title: 'Einheit 4', subtitle: 'Familie und Beziehungen', theme: 'Familie', answers: { p1: ['Falsch', 'Richtig', 'Richtig', 'Falsch', 'Richtig', 'Falsch'], p2: ['B', 'C', 'A', 'B', 'C', 'C'], p3: ['B', 'H', 'D', 'I', 'O', 'I', 'E'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['B', 'C', 'A', 'B'] } },
   { id: 'unit-5', title: 'Einheit 5', subtitle: 'Gesundheit und Wohlbefinden', theme: 'Gesundheit', answers: { p1: ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Falsch', 'Falsch'], p2: ['C', 'E', 'B', 'B', 'C', 'B'], p3: ['B', 'D', 'G', 'H', 'J', 'L', 'M'], p4: ['Nein', 'Nein', 'Ja', 'Nein', 'Ja', 'Ja', 'Nein'], p5: ['B', 'A', 'C', 'B'] } },
   { id: 'unit-6', title: 'Einheit 6', subtitle: 'Stadt und Mobilität', theme: 'Stadt', answers: { p1: ['Richtig', 'Richtig', 'Falsch', 'Falsch', 'Richtig', 'Falsch'], p2: ['A', 'B', 'C', 'A', 'B', 'C'], p3: ['C', 'D', 'E', 'F', 'G', 'H', 'I'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['A', 'B', 'C', 'A'] } },
   { id: 'unit-7', title: 'Einheit 7', subtitle: 'Kultur und Medien', theme: 'Kultur', answers: { p1: ['Richtig', 'Richtig', 'Falsch', 'Falsch', 'Falsch', 'Richtig'], p2: ['B', 'C', 'A', 'B', 'C', 'A'], p3: ['A', 'B', 'C', 'D', 'E', 'F', 'G'], p4: ['Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein'], p5: ['C', 'A', 'B', 'C'] } },
@@ -334,7 +334,7 @@ function renderHome() {
     <div class="card hero-card">
       <div class="hero-badge">Exakt B1 · Vorbereitung</div>
       <h2>Übe gezielt mit 10 professionell aufgebauten Tests</h2>
-      <p>Jeder Test enthält 5 Teile, klare Aufgaben, sofortige Lösungen und einen Verlauf für deine Fortschritte.</p>
+      <p>Jeder Einheitentest enthält 5 Teile, klare Aufgaben, sofortige Lösungen und einen Verlauf für deine Fortschritte.</p>
       <div class="result-grid">
         <div class="metric-card">
           <span>Abgeschlossene Tests</span>
@@ -519,7 +519,7 @@ function renderPreparation() {
   prepEl.innerHTML = `
     <div class="card">
       <h2>Vorbereitung und Lösungen</h2>
-      <p class="quiz-meta">Diese Seite ist deine Lernhilfe: prüfe jede Lösung direkt, lerne die Muster und starte einen Test danach erneut frisch.</p>
+      <p class="quiz-meta">Diese Seite folgt dem Lösungsschlüssel aus dem PDF-Korrekturbogen und zeigt die Lösungen direkt zu jeder Einheit an.</p>
       <div class="prep-grid">
         <div class="prep-card">
           <h3>So nutzt du die Seite</h3>
