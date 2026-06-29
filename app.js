@@ -1,7 +1,8 @@
 const STORAGE_KEY = 'exakt-b1-progress-v1';
 
 function normalizeAnswer(value) {
-  return String(value || '').trim().toLowerCase();
+  const text = String(value || '').trim().toLowerCase();
+  return text.replace(/0/g, 'o').replace(/\s+/g, '');
 }
 
 const testThemes = [
