@@ -59,13 +59,14 @@ function createTest({ id, title, subtitle, theme }) {
 
   const part4 = {
     title: 'Teil 4 – Ja oder Nein',
-    questions: createPartQuestions('p4', 6, [
+    questions: createPartQuestions('p4', 7, [
       { prompt: `Ist die Lösung für ${theme} hilfreich?`, options: ['Ja', 'Nein'], correct: 'Ja', type: 'yes-no' },
       { prompt: `Wird der Vorschlag zu ${theme} unterstützt?`, options: ['Ja', 'Nein'], correct: 'Nein', type: 'yes-no' },
       { prompt: `Ist die Information über ${theme} klar?`, options: ['Ja', 'Nein'], correct: 'Ja', type: 'yes-no' },
       { prompt: `Passt die Empfehlung zu ${theme}?`, options: ['Ja', 'Nein'], correct: 'Ja', type: 'yes-no' },
       { prompt: `Wäre die Entscheidung bei ${theme} sinnvoll?`, options: ['Ja', 'Nein'], correct: 'Nein', type: 'yes-no' },
-      { prompt: `Ist der Hinweis zu ${theme} passend?`, options: ['Ja', 'Nein'], correct: 'Ja', type: 'yes-no' }
+      { prompt: `Ist der Hinweis zu ${theme} passend?`, options: ['Ja', 'Nein'], correct: 'Ja', type: 'yes-no' },
+      { prompt: `Ist der letzte Gedanke zu ${theme} verständlich?`, options: ['Ja', 'Nein'], correct: 'Nein', type: 'yes-no' }
     ])
   };
 
