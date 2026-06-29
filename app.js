@@ -1,23 +1,33 @@
 const STORAGE_KEY = 'exakt-b1-progress-v1';
 
+function normalizeAnswer(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
 const testThemes = [
-  { id: 'test-1', title: 'Test 1', subtitle: 'Alltag und Beruf', theme: 'Beruf' },
-  { id: 'test-2', title: 'Test 2', subtitle: 'Reisen und Freizeit', theme: 'Reisen' },
-  { id: 'test-3', title: 'Test 3', subtitle: 'Familie und Beziehungen', theme: 'Familie' },
-  { id: 'test-4', title: 'Test 4', subtitle: 'Gesundheit und Wohlbefinden', theme: 'Gesundheit' },
-  { id: 'test-5', title: 'Test 5', subtitle: 'Stadtleben und Mobilität', theme: 'Stadt' },
-  { id: 'test-6', title: 'Test 6', subtitle: 'Kultur und Medien', theme: 'Kultur' },
-  { id: 'test-7', title: 'Test 7', subtitle: 'Essen und Einkaufen', theme: 'Essen' },
-  { id: 'test-8', title: 'Test 8', subtitle: 'Sprachen und Lernen', theme: 'Lernen' },
-  { id: 'test-9', title: 'Test 9', subtitle: 'Umwelt und Nachhaltigkeit', theme: 'Umwelt' },
-  { id: 'test-10', title: 'Test 10', subtitle: 'Zukunft und Pläne', theme: 'Zukunft' }
+  { id: 'unit-1', title: 'Einheit 1', subtitle: 'Leseverstehen', theme: 'Alltag', answers: { p1: ['Richtig', 'Falsch', 'Falsch', 'Falsch', 'Richtig', 'Richtig'], p2: ['A', 'C', 'C', 'A', 'C', 'A'], p3: ['B', 'D', 'A', 'B', 'O', 'F', 'E'], p4: ['Nein', 'Ja', 'Nein', 'Nein', 'Ja', 'Ja', 'Ja'], p5: ['A', 'C', 'B', 'A'] } },
+  { id: 'unit-2', title: 'Einheit 2', subtitle: 'Beruf und Alltag', theme: 'Beruf', answers: { p1: ['Falsch', 'Richtig', 'Richtig', 'Falsch', 'Richtig', 'Falsch'], p2: ['B', 'C', 'A', 'B', 'C', 'C'], p3: ['B', 'H', 'D', 'I', 'O', 'I', 'E'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['B', 'C', 'A', 'B'] } },
+  { id: 'unit-3', title: 'Einheit 3', subtitle: 'Freizeit und Reisen', theme: 'Reisen', answers: { p1: ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Falsch', 'Richtig'], p2: ['C', 'A', 'B', 'C', 'A', 'B'], p3: ['C', 'F', 'G', 'J', 'M', 'N', 'O'], p4: ['Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein'], p5: ['C', 'B', 'A', 'C'] } },
+  { id: 'unit-4', title: 'Einheit 4', subtitle: 'Familie und Beziehungen', theme: 'Familie', answers: { p1: ['Richtig', 'Richtig', 'Falsch', 'Richtig', 'Falsch', 'Richtig'], p2: ['A', 'B', 'C', 'A', 'B', 'C'], p3: ['D', 'E', 'F', 'G', 'H', 'I', 'J'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['A', 'B', 'C', 'A'] } },
+  { id: 'unit-5', title: 'Einheit 5', subtitle: 'Gesundheit und Wohlbefinden', theme: 'Gesundheit', answers: { p1: ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Falsch', 'Falsch'], p2: ['C', 'E', 'B', 'B', 'C', 'B'], p3: ['B', 'D', 'G', 'H', 'J', 'L', 'M'], p4: ['Nein', 'Nein', 'Ja', 'Nein', 'Ja', 'Ja', 'Nein'], p5: ['B', 'A', 'C', 'B'] } },
+  { id: 'unit-6', title: 'Einheit 6', subtitle: 'Stadt und Mobilität', theme: 'Stadt', answers: { p1: ['Richtig', 'Richtig', 'Falsch', 'Falsch', 'Richtig', 'Falsch'], p2: ['A', 'B', 'C', 'A', 'B', 'C'], p3: ['C', 'D', 'E', 'F', 'G', 'H', 'I'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['A', 'B', 'C', 'A'] } },
+  { id: 'unit-7', title: 'Einheit 7', subtitle: 'Kultur und Medien', theme: 'Kultur', answers: { p1: ['Richtig', 'Richtig', 'Falsch', 'Falsch', 'Falsch', 'Richtig'], p2: ['B', 'C', 'A', 'B', 'C', 'A'], p3: ['A', 'B', 'C', 'D', 'E', 'F', 'G'], p4: ['Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein'], p5: ['C', 'A', 'B', 'C'] } },
+  { id: 'unit-8', title: 'Einheit 8', subtitle: 'Essen und Einkaufen', theme: 'Essen', answers: { p1: ['Falsch', 'Richtig', 'Falsch', 'Richtig', 'Falsch', 'Richtig'], p2: ['A', 'C', 'B', 'A', 'C', 'B'], p3: ['E', 'F', 'G', 'H', 'I', 'J', 'K'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['B', 'C', 'A', 'B'] } },
+  { id: 'unit-9', title: 'Einheit 9', subtitle: 'Sprachen und Lernen', theme: 'Lernen', answers: { p1: ['Richtig', 'Richtig', 'Falsch', 'Falsch', 'Richtig', 'Falsch'], p2: ['A', 'B', 'C', 'A', 'B', 'C'], p3: ['H', 'I', 'J', 'K', 'L', 'M', 'N'], p4: ['Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein'], p5: ['C', 'A', 'B', 'C'] } },
+  { id: 'unit-10', title: 'Einheit 10', subtitle: 'Umwelt und Nachhaltigkeit', theme: 'Umwelt', answers: { p1: ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Richtig', 'Falsch'], p2: ['B', 'C', 'A', 'B', 'C', 'A'], p3: ['I', 'J', 'K', 'L', 'M', 'N', 'O'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['A', 'B', 'C', 'A'] } },
+  { id: 'unit-11', title: 'Einheit 11', subtitle: 'Zukunft und Pläne', theme: 'Zukunft', answers: { p1: ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Richtig', 'Falsch'], p2: ['A', 'C', 'B', 'A', 'C', 'B'], p3: ['J', 'K', 'L', 'M', 'N', 'O', 'A'], p4: ['Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein'], p5: ['B', 'C', 'A', 'B'] } },
+  { id: 'unit-12', title: 'Einheit 12', subtitle: 'Medien und Alltag', theme: 'Medien', answers: { p1: ['Richtig', 'Richtig', 'Falsch', 'Falsch', 'Richtig', 'Falsch'], p2: ['A', 'B', 'C', 'A', 'B', 'C'], p3: ['K', 'L', 'M', 'N', 'O', 'A', 'B'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['C', 'A', 'B', 'C'] } },
+  { id: 'unit-13', title: 'Einheit 13', subtitle: 'Sprache und Wortschatz', theme: 'Sprache', answers: { p1: ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Falsch', 'Richtig'], p2: ['B', 'C', 'A', 'B', 'C', 'A'], p3: ['L', 'M', 'N', 'O', 'A', 'B', 'C'], p4: ['Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein'], p5: ['A', 'B', 'C', 'A'] } },
+  { id: 'unit-14', title: 'Einheit 14', subtitle: 'Texte und Informationen', theme: 'Texte', answers: { p1: ['Richtig', 'Falsch', 'Richtig', 'Falsch', 'Richtig', 'Falsch'], p2: ['A', 'C', 'B', 'A', 'C', 'B'], p3: ['M', 'N', 'O', 'A', 'B', 'C', 'D'], p4: ['Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja'], p5: ['B', 'C', 'A', 'B'] } },
+  { id: 'unit-15', title: 'Einheit 15', subtitle: 'Zusammenfassung und Prüfung', theme: 'Prüfung', answers: { p1: ['Richtig', 'Richtig', 'Falsch', 'Falsch', 'Richtig', 'Falsch'], p2: ['B', 'A', 'C', 'B', 'A', 'C'], p3: ['N', 'O', 'A', 'B', 'C', 'D', 'E'], p4: ['Nein', 'Ja', 'Nein', 'Ja', 'Nein', 'Ja', 'Nein'], p5: ['C', 'B', 'A', 'C'] } }
 ];
 
-function createTest({ id, title, subtitle, theme }) {
-  const createPartQuestions = (prefix, count, questionsData) =>
+function createTest({ id, title, subtitle, theme, answers }) {
+  const createPartQuestions = (prefix, count, questionsData, answerValues = []) =>
     questionsData.slice(0, count).map((item, index) => {
       const questionId = `${id}-${prefix}-${index + 1}`;
-      return createQuestion(questionId, item.prompt, item.options, item.correct, item.type);
+      const correct = answerValues[index] || item.correct;
+      return createQuestion(questionId, item.prompt, item.options, correct, item.type);
     });
 
   const part1 = {
@@ -29,7 +39,7 @@ function createTest({ id, title, subtitle, theme }) {
       { prompt: `Wird der Vorschlag zu ${theme} als sinnvoll bewertet?`, options: ['Richtig', 'Falsch'], correct: 'Richtig', type: 'true-false' },
       { prompt: `Ist die Information über ${theme} im Text nicht vollständig?`, options: ['Richtig', 'Falsch'], correct: 'Falsch', type: 'true-false' },
       { prompt: `Klingt der Hinweis zu ${theme} passend?`, options: ['Richtig', 'Falsch'], correct: 'Richtig', type: 'true-false' }
-    ])
+    ], answers.p1)
   };
 
   const part2 = {
@@ -41,7 +51,7 @@ function createTest({ id, title, subtitle, theme }) {
       { prompt: `Welche Option passt zur Situation rund um ${theme}?`, options: ['A', 'B', 'C'], correct: 'A', type: 'abc' },
       { prompt: `Welche Antwort ist bei ${theme} die beste Wahl?`, options: ['A', 'B', 'C'], correct: 'B', type: 'abc' },
       { prompt: `Welche Lösung würde man bei ${theme} zuerst wählen?`, options: ['A', 'B', 'C'], correct: 'C', type: 'abc' }
-    ])
+    ], answers.p2)
   };
 
   const part3 = {
@@ -54,7 +64,7 @@ function createTest({ id, title, subtitle, theme }) {
       { prompt: `Welcher Buchstabe passt zur Beschreibung von ${theme}?`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'F', type: 'match' },
       { prompt: `Ordnen Sie den Hinweis zu ${theme} korrekt zu.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'K', type: 'match' },
       { prompt: `Ordnen Sie den letzten Hinweis zu ${theme} passend zu.`, options: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'], correct: 'D', type: 'match' }
-    ])
+    ], answers.p3)
   };
 
   const part4 = {
@@ -67,7 +77,7 @@ function createTest({ id, title, subtitle, theme }) {
       { prompt: `Wäre die Entscheidung bei ${theme} sinnvoll?`, options: ['Ja', 'Nein'], correct: 'Nein', type: 'yes-no' },
       { prompt: `Ist der Hinweis zu ${theme} passend?`, options: ['Ja', 'Nein'], correct: 'Ja', type: 'yes-no' },
       { prompt: `Ist der letzte Gedanke zu ${theme} verständlich?`, options: ['Ja', 'Nein'], correct: 'Nein', type: 'yes-no' }
-    ])
+    ], answers.p4)
   };
 
   const part5 = {
@@ -77,7 +87,7 @@ function createTest({ id, title, subtitle, theme }) {
       { prompt: `Welche Lösung wäre bei ${theme} die beste Abschlussform?`, options: ['A', 'B', 'C'], correct: 'C', type: 'abc' },
       { prompt: `Welche Variante passt am besten zur Situation bei ${theme}?`, options: ['A', 'B', 'C'], correct: 'A', type: 'abc' },
       { prompt: `Welche Antwort wäre in ${theme} am sinnvollsten?`, options: ['A', 'B', 'C'], correct: 'B', type: 'abc' }
-    ])
+    ], answers.p5)
   };
 
   return { id, title, subtitle, theme, parts: [part1, part2, part3, part4, part5] };
@@ -247,16 +257,18 @@ function submitQuiz() {
     const partQuestions = part.questions;
     let partCorrect = 0;
     partQuestions.forEach((question) => {
-      const selected = state.answers[question.id];
-      const isCorrect = selected === question.correct;
+      const selected = normalizeAnswer(state.answers[question.id]);
+      const expected = normalizeAnswer(question.correct);
+      const isCorrect = selected === expected;
       if (isCorrect) partCorrect += 1;
     });
     return { title: part.title, total: partQuestions.length, correct: partCorrect };
   });
 
   questions.forEach((question) => {
-    const selected = state.answers[question.id];
-    if (selected === question.correct) correctCount += 1;
+    const selected = normalizeAnswer(state.answers[question.id]);
+    const expected = normalizeAnswer(question.correct);
+    if (selected === expected) correctCount += 1;
   });
 
   const total = questions.length;
@@ -265,7 +277,7 @@ function submitQuiz() {
     ...question,
     selected: state.answers[question.id] || '—',
     correct: question.correct,
-    isCorrect: state.answers[question.id] === question.correct
+    isCorrect: normalizeAnswer(state.answers[question.id]) === normalizeAnswer(question.correct)
   }));
 
   const existing = state.progress[currentTest.id] || { history: [], answers: {} };
